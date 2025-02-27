@@ -1,9 +1,15 @@
 #include <M5NanoC6.h>
 #include <Adafruit_NeoPixel.h>
+#include "BLEDevice.h"
 
 #define NEOPIXEL_PIN 1  // NeoPixelのデータピンに接続するArduinoのピン番号
 #define NUMPIXELS 16    // 接続するNeoPixelの数
 #define UART_RX_PIN 2   // rapsbeery pi からUARTでデータを受け取る
+
+#define BEACON_UUID "87b99b2c-90fd-11e9-bc42-526af7764f64"  // 任意のUUIDを設定
+#define BEACON_MAJOR 100                                    // 任意のMajor値
+#define BEACON_MINOR 1                                      // 任意のMinor値
+#define TX_POWER -59                                        // 校正された信号強度
 
 Adafruit_NeoPixel led(1, M5NANO_C6_RGB_LED_DATA_PIN, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel pixels(NUMPIXELS, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
@@ -15,19 +21,26 @@ void setGlobal(int r, int g, int b) {
     delay(10);
     pixels.show();
   }
-  delay(1000);
 }
 
 
-void TestRGB(){
+void TestRGB() {
   setGlobal(40, 0, 0);  // 赤
+  delay(100);
   setGlobal(15, 0, 5);  // ピンク
+  delay(100);
   setGlobal(17, 3, 0);  // オレンジ
+  delay(100);
   setGlobal(14, 6, 0);  // 黄色
+  delay(100);
   setGlobal(8, 12, 0);  // 黄緑
+  delay(100);
   setGlobal(0, 20, 0);  // 緑
+  delay(100);
   setGlobal(0, 10, 10);  // 水色
+  delay(100);
   setGlobal(0, 0, 20);  // 青
+  delay(100);
   setGlobal(0, 0, 0);  // off
 }
 
@@ -56,6 +69,12 @@ void setup() {
   Serial.begin(115200);
   RSP.begin(9600, SERIAL_8N1, UART_RX_PIN, -1);
   Serial.println("UART受信モード開始");
+
+  // BLEデバイスの初期化
+  BLEDevice::init("NINJAIOT_SINOBI");
+  BLEDevice::startAdvertising();
+  Serial.println("BLE Beacon started");
+
 }
 
 void DistanceToRGB(int distance) {
@@ -90,8 +109,7 @@ void loop() {
     Serial.println(received);
     DistanceToRGB(received);
 
-    delay(1000);
-    led.setPixelColor(0, led.Color(0,0,255));
+    led.setPixelColor(0, led.Color(0, 0, 255));
     led.show();
   }
   delay(10);
